@@ -1,0 +1,3 @@
+{
+  "extends": "@working-with-tables/config/tsconfig.base.json"
+}
