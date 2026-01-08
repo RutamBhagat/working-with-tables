@@ -29,27 +29,28 @@ drizzle-kit@beta -D
 <Callout>
 Below is the table of contents. Click an item to jump to that section:
 
-- [What is working differently from v1](#what-was-changed-and-is-working-differently-from-v1)  
-- [New features in v2](2#what-is-new)  
-- [How to migrate relations definition from v1 to v2](#how-to-migrate-relations-schema-definition-from-v1-to-v2)  
-- [How to migrate queries from v1 to v2](#how-to-migrate-queries-from-v1-to-v2)  
-- [Partial upgrade, or how to stay on v1 even after an upgrade?](#partial-upgrade-or-how-to-stay-on-rqb-v1-even-after-an-upgrade)  
+- [What is working differently from v1](#what-was-changed-and-is-working-differently-from-v1)
+- [New features in v2](2#what-is-new)
+- [How to migrate relations definition from v1 to v2](#how-to-migrate-relations-schema-definition-from-v1-to-v2)
+- [How to migrate queries from v1 to v2](#how-to-migrate-queries-from-v1-to-v2)
+- [Partial upgrade, or how to stay on v1 even after an upgrade?](#partial-upgrade-or-how-to-stay-on-rqb-v1-even-after-an-upgrade)
 - [Internal changes(imports, internal types, etc.)](#internal-changes)
-</Callout>
+  </Callout>
 
 ### API changes
+
 #### What is working differently from v1
 
-{/* ##### Drizzle Relations schema definition */}
+{/_ ##### Drizzle Relations schema definition _/}
 
 One of the biggest updates were in **Relations Schema definition**
 
-The first difference is that you no longer need to specify `relations` for each table separately in different objects and 
+The first difference is that you no longer need to specify `relations` for each table separately in different objects and
 then pass them all to `drizzle()` along with your schema. In Relational Queries v2, you now have one dedicated place to
-specify all the relations for all the tables you need. 
+specify all the relations for all the tables you need.
 
-The `r` parameter in the callback provides comprehensive autocomplete 
-functionality - including all tables from your schema and functions such as `one`, `many`, and `through` - essentially 
+The `r` parameter in the callback provides comprehensive autocomplete
+functionality - including all tables from your schema and functions such as `one`, `many`, and `through` - essentially
 offering everything you need to specify your relations.
 
 ```ts
@@ -61,6 +62,7 @@ export const relations = defineRelations(schema, (r) => ({
     ...
 }));
 ```
+
 ```ts
 // index.ts
 import { relations } from "./relations"
@@ -77,17 +79,18 @@ import * as p from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
 export const users = p.pgTable('users', {
-	id: p.integer().primaryKey(),
-	name: p.text(),
-	invitedBy: p.integer('invited_by'),
+id: p.integer().primaryKey(),
+name: p.text(),
+invitedBy: p.integer('invited_by'),
 });
 
 export const posts = p.pgTable('posts', {
-	id: p.integer().primaryKey(),
-	content: p.text(),
-	authorId: p.integer('author_id'),
+id: p.integer().primaryKey(),
+content: p.text(),
+authorId: p.integer('author_id'),
 });
-```
+
+````
 </Callout>
 
 **One place for all your relations**
@@ -111,7 +114,8 @@ export const postsRelation = relations(posts, ({ one, many }) => ({
     references: [users.id],
   }),
 }));
-```
+````
+
 </Callout>
 
 <Callout title='✅ v2'>
@@ -120,21 +124,22 @@ import { defineRelations } from "drizzle-orm";
 import * as schema from "./schema";
 
 export const relations = defineRelations(schema, (r) => ({
-  users: {
-    invitee: r.one.users({
-      from: r.users.invitedBy,
-      to: r.users.id,
-    }),
-    posts: r.many.posts(),
-  },
-  posts: {
-    author: r.one.users({
-      from: r.posts.authorId,
-      to: r.users.id,
-    }),
-  },
+users: {
+invitee: r.one.users({
+from: r.users.invitedBy,
+to: r.users.id,
+}),
+posts: r.many.posts(),
+},
+posts: {
+author: r.one.users({
+from: r.posts.authorId,
+to: r.users.id,
+}),
+},
 }));
-```
+
+````
 </Callout>
 
 You can still separate it into different `parts`, and you can make the parts any size you want
@@ -161,7 +166,7 @@ export const part = defineRelationsPart(schema, (r) => ({
     }),
   }
 }));
-```
+````
 
 and then you can provide it to the db instance
 
@@ -171,7 +176,7 @@ const db = drizzle(process.env.DB_URL, { relations: { ...relations, ...part } })
 
 **Define `many` without `one`**
 
-In v1, if you wanted only the `many` side of a relationship, you had to specify the `one` side on the other end, 
+In v1, if you wanted only the `many` side of a relationship, you had to specify the `one` side on the other end,
 which made for a poor developer experience.
 
 In v2, you can simply use the `many` side without any additional steps
@@ -182,16 +187,17 @@ import { relations } from "drizzle-orm/_relations";
 import { users, posts } from './schema';
 
 export const usersRelation = relations(users, ({ one, many }) => ({
-  posts: many(posts),
+posts: many(posts),
 }));
 
 export const postsRelation = relations(posts, ({ one, many }) => ({
-  author: one(users, {
-    fields: [posts.authorId],
-    references: [users.id],
-  }),
+author: one(users, {
+fields: [posts.authorId],
+references: [users.id],
+}),
 }));
-```
+
+````
 </Callout>
 
 <Callout title='✅ v2'>
@@ -207,12 +213,13 @@ export const relations = defineRelations(schema, (r) => ({
     }),
   },
 }));
-```
+````
+
 </Callout>
 
 **New `optional` option**
 
-`optional: false` at the type level makes the `author` key in the `posts` object required. 
+`optional: false` at the type level makes the `author` key in the `posts` object required.
 This should be used when you are certain that this specific entity will always exist.
 
 <Callout title="❌ v1">
@@ -225,15 +232,16 @@ import { defineRelations } from "drizzle-orm";
 import * as schema from "./schema";
 
 export const relations = defineRelations(schema, (r) => ({
-  users: {
-    posts: r.many.posts({
-      from: r.users.id,
-      to: r.posts.authorId,
-      optional: false,
-    }),
-  },
+users: {
+posts: r.many.posts({
+from: r.users.id,
+to: r.posts.authorId,
+optional: false,
+}),
+},
 }));
-```
+
+````
 </Callout>
 
 **No modes in `drizzle()`**
@@ -247,7 +255,8 @@ import * as schema from './schema'
 const db = drizzle(process.env.DATABASE_URL, { mode: "planetscale", schema });
 // or
 const db = drizzle(process.env.DATABASE_URL, { mode: "default", schema });
-```
+````
+
 </Callout>
 
 <Callout title='✅ v2'>
@@ -255,7 +264,8 @@ const db = drizzle(process.env.DATABASE_URL, { mode: "default", schema });
 import { relations } from './relations'
 
 const db = drizzle(process.env.DATABASE_URL, { relations });
-```
+
+````
 </Callout>
 
 **`from` and `to` upgrades**
@@ -270,7 +280,8 @@ author: one(users, {
   references: [users.id],
 }),
 ...
-```
+````
+
 </Callout>
 
 <Callout title='✅ v2'>
@@ -300,13 +311,14 @@ import { relations } from "drizzle-orm/_relations";
 import { users, posts } from './schema';
 
 export const postsRelation = relations(posts, ({ one }) => ({
-  author: one(users, {
-    fields: [posts.authorId],
-    references: [users.id],
-	  relationName: "author_post",
-  }),
+author: one(users, {
+fields: [posts.authorId],
+references: [users.id],
+relationName: "author_post",
+}),
 }));
-```
+
+````
 </Callout>
 
 <Callout title='✅ v2'>
@@ -323,7 +335,8 @@ export const relations = defineRelations(schema, (r) => ({
     }),
   },
 }));
-```
+````
+
 </Callout>
 
 **`custom types` new functions**
@@ -358,12 +371,15 @@ Additional mapping that could be required for such scenarios can be handled usin
 Used by [relational queries](https://orm.drizzle.team/docs/rqb-v2)
 
 For example, when using bigint we need to cast field to text to preserve data integrity
+
 ```ts
 forJsonSelect(identifier: SQL, sql: SQLGenerator, arrayDimensions?: number): SQL {
 	return sql`${identifier}::text`
 },
 ```
+
 This will change query from:
+
 ```sql
 SELECT
 	row_to_json("t".*)
@@ -375,7 +391,9 @@ SELECT
 		"table"
 	) AS "t"
 ```
+
 to:
+
 ```sql
 SELECT
 	row_to_json("t".*)
@@ -387,18 +405,23 @@ SELECT
 		"table"
 	) AS "t"
 ```
+
 Returned by query object will change from:
+
 ```ts
 {
 	bigint: 5044565289845416000; // Partial data loss due to direct conversion to JSON format
 }
 ```
+
 to:
+
 ```ts
 {
 	bigint: "5044565289845416380"; // Data is preserved due to conversion of field to text before JSON-ification
 }
 ```
+
 </Callout>
 
 <Callout title='✅ v2'>
@@ -432,31 +455,32 @@ You don't need to do it now!
 import * as p from "drizzle-orm/pg-core";
 
 export const users = p.pgTable("users", {
-  id: p.integer().primaryKey(),
-  name: p.text(),
-  verified: p.boolean().notNull(),
+id: p.integer().primaryKey(),
+name: p.text(),
+verified: p.boolean().notNull(),
 });
 
 export const groups = p.pgTable("groups", {
-  id: p.integer().primaryKey(),
-  name: p.text(),
+id: p.integer().primaryKey(),
+name: p.text(),
 });
 
 export const usersToGroups = p.pgTable(
-  "users_to_groups",
-  {
-    userId: p
-      .integer("user_id")
-      .notNull()
-      .references(() => users.id),
-    groupId: p
-      .integer("group_id")
-      .notNull()
-      .references(() => groups.id),
-  },
-  (t) => [p.primaryKey({ columns: [t.userId, t.groupId] })]
+"users_to_groups",
+{
+userId: p
+.integer("user_id")
+.notNull()
+.references(() => users.id),
+groupId: p
+.integer("group_id")
+.notNull()
+.references(() => groups.id),
+},
+(t) => [p.primaryKey({ columns: [t.userId, t.groupId] })]
 );
-```
+
+````
 </Callout>
 
 <Callout title="❌ v1">
@@ -479,7 +503,8 @@ export const usersToGroupsRelations = relations(usersToGroups, ({ one }) => ({
     references: [users.id],
   }),
 }));
-```
+````
+
 ```ts
 // Query example
 const response = await db.query.users.findMany({
@@ -493,6 +518,7 @@ const response = await db.query.users.findMany({
   },
 });
 ```
+
 </Callout>
 
 <Callout title='✅ v2'>
@@ -501,17 +527,18 @@ import * as schema from './schema';
 import { defineRelations } from 'drizzle-orm';
 
 export const relations = defineRelations(schema, (r) => ({
-  users: {
-    groups: r.many.groups({
-      from: r.users.id.through(r.usersToGroups.userId),
-      to: r.groups.id.through(r.usersToGroups.groupId),
-    }),
-  },
-  groups: {
-    participants: r.many.users(),
-  },
+users: {
+groups: r.many.groups({
+from: r.users.id.through(r.usersToGroups.userId),
+to: r.groups.id.through(r.usersToGroups.groupId),
+}),
+},
+groups: {
+participants: r.many.users(),
+},
 }));
-```
+
+````
 ```ts
 // Query example
 const response = await db.query.users.findMany({
@@ -519,7 +546,8 @@ const response = await db.query.users.findMany({
     groups: true,
   },
 });
-```
+````
+
 </Callout>
 
 **Predefined filters**
@@ -534,19 +562,20 @@ import * as schema from './schema';
 import { defineRelations } from 'drizzle-orm';
 
 export const relations = defineRelations(schema,
-  (r) => ({
-    groups: {
-      verifiedUsers: r.many.users({
-        from: r.groups.id.through(r.usersToGroups.groupId),
-        to: r.users.id.through(r.usersToGroups.userId),
-        where: {
-          verified: true,
-        },
-      }),
-    },
-  })
+(r) => ({
+groups: {
+verifiedUsers: r.many.users({
+from: r.groups.id.through(r.usersToGroups.groupId),
+to: r.users.id.through(r.usersToGroups.userId),
+where: {
+verified: true,
+},
+}),
+},
+})
 );
-```
+
+````
 ```ts {4}
 // Query example: get groups with all verified users
 const response = await db.query.groups.findMany({
@@ -554,7 +583,8 @@ const response = await db.query.groups.findMany({
     verifiedUsers: true,
   },
 });
-```
+````
+
 </Callout>
 
 ##### `where` is now object
@@ -585,18 +615,19 @@ For a complete API Reference please check our [Select Filters docs](/docs/rqb-v2
 import { integer, jsonb, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
-  id: integer("id").primaryKey(),
-  name: text("name"),
-  email: text("email").notNull(),
-  age: integer("age"),
-  createdAt: timestamp("created_at").defaultNow(),
-  lastLogin: timestamp("last_login"),
-  subscriptionEnd: timestamp("subscription_end"),
-  lastActivity: timestamp("last_activity"),
-  preferences: jsonb("preferences"),      // JSON column for user settings/preferences
-  interests: text("interests").array(),     // Array column for user interests
+id: integer("id").primaryKey(),
+name: text("name"),
+email: text("email").notNull(),
+age: integer("age"),
+createdAt: timestamp("created_at").defaultNow(),
+lastLogin: timestamp("last_login"),
+subscriptionEnd: timestamp("subscription_end"),
+lastActivity: timestamp("last_activity"),
+preferences: jsonb("preferences"), // JSON column for user settings/preferences
+interests: text("interests").array(), // Array column for user interests
 });
-```
+
+````
 ```ts
 const response = db.query.users.findMany({
   where: {
@@ -617,7 +648,8 @@ const response = db.query.users.findMany({
     ],
   },
 });
-```
+````
+
 </Callout>
 
 ##### `orderBy` is now object
@@ -661,6 +693,7 @@ const usersWithPosts = await db.query.usersTable.findMany({
   },
 });
 ```
+
 </Callout>
 
 ##### Using offset on related objects
@@ -696,20 +729,21 @@ In new version `drizzle-kit pull` supports pulling `relations.ts` file in a new 
 drizzle-kit pull
 </Npx>
 
-#### Step 2 
+#### Step 2
 
-Transfer generated relations code from `drizzle/relations.ts` to the file you are using to specify your relations 
+Transfer generated relations code from `drizzle/relations.ts` to the file you are using to specify your relations
+
 ```plaintext {4-5}
  ├ 📂 drizzle
  │ ├ 📂 meta
  │ ├ 📜 migration.sql
  │ ├ 📜 relations.ts ────────┐
  │ └ 📜 schema.ts            |
- ├ 📂 src                    │ 
+ ├ 📂 src                    │
  │ ├ 📂 db                   │
  │ │ ├ 📜 relations.ts <─────┘
- │ │ └ 📜 schema.ts 
- │ └ 📜 index.ts         
+ │ │ └ 📜 schema.ts
+ │ └ 📜 index.ts
  └ …
 ```
 
@@ -719,14 +753,16 @@ Transfer generated relations code from `drizzle/relations.ts` to the file you ar
 import * as schema from './schema'
 ```
 
-You may need to change this import to a file where ALL your schema tables are located. 
+You may need to change this import to a file where ALL your schema tables are located.
 
 If there are multiple schema files, you can do the following:
+
 ```ts
 import * as schema1 from './schema1'
 import * as schema2 from './schema2'
 ...
 ```
+
 </Callout>
 
 #### Step 3
@@ -739,7 +775,8 @@ import * as schema from './schema'
 import { drizzle } from 'drizzle-orm/...'
 
 const db = drizzle('<url>', { schema })
-```
+
+````
 </Callout>
 
 <Callout title='After'>
@@ -749,13 +786,13 @@ import { relations } from './relations'
 import { drizzle } from 'drizzle-orm/...'
 
 const db = drizzle('<url>', { relations })
-```
+````
+
 </Callout>
 
 <Callout>
 If you had MySQL dialect, you can remove `mode` from `drizzle()` as long as it's not needed in version 2
 </Callout>
-
 
 ##### Manual migration
 
@@ -767,12 +804,13 @@ If you want to migrate manually, you can check our [Drizzle Relations section](/
 
 You can check our [Select Filters docs](/docs/rqb-v2#select-filters) to see examples and a complete API reference.
 
-With the new syntax, you can use `AND`, `OR`, `NOT`, and `RAW`, plus all the filtering operators that 
+With the new syntax, you can use `AND`, `OR`, `NOT`, and `RAW`, plus all the filtering operators that
 were previously available in Relations v1.
 
 **Examples**
 <CodeTabs items={["simple eq", "using AND", "using OR", "using NOT", "complex example using RAW"]}>
 <CodeTab>
+
 ```ts
 const response = db.query.users.findMany({
   where: {
@@ -780,11 +818,13 @@ const response = db.query.users.findMany({
   },
 });
 ```
+
 ```sql {3}
 select "users"."id" as "id", "users"."name" as "name"
-from "users" 
+from "users"
 where ("users"."age" = $1)
 ```
+
 </CodeTab>
 <CodeTab>
 ```ts
@@ -853,18 +893,19 @@ where (not "users"."id" > $1 and "users"."name" like $2)
 import { integer, jsonb, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
-  id: integer("id").primaryKey(),
-  name: text("name"),
-  email: text("email").notNull(),
-  age: integer("age"),
-  createdAt: timestamp("created_at").defaultNow(),
-  lastLogin: timestamp("last_login"),
-  subscriptionEnd: timestamp("subscription_end"),
-  lastActivity: timestamp("last_activity"),
-  preferences: jsonb("preferences"),      // JSON column for user settings/preferences
-  interests: text("interests").array(),     // Array column for user interests
+id: integer("id").primaryKey(),
+name: text("name"),
+email: text("email").notNull(),
+age: integer("age"),
+createdAt: timestamp("created_at").defaultNow(),
+lastLogin: timestamp("last_login"),
+subscriptionEnd: timestamp("subscription_end"),
+lastActivity: timestamp("last_activity"),
+preferences: jsonb("preferences"), // JSON column for user settings/preferences
+interests: text("interests").array(), // Array column for user interests
 });
-```
+
+````
 ```ts
 const response = db.query.users.findMany({
   where: {
@@ -885,9 +926,12 @@ const response = db.query.users.findMany({
     ],
   },
 });
-```
+````
+
 ```sql
+
 ```
+
 </CodeTab>
 </CodeTabs>
 
@@ -991,13 +1035,13 @@ await db.query.users.findMany();
 ```
 </Callout>
 
-In Relational Queries v2, we moved it to `db._query` so that `db.query` could be used for a new syntax, 
+In Relational Queries v2, we moved it to `db._query` so that `db.query` could be used for a new syntax,
 while still giving you the option to use the old syntax via `db._query`.
 
-We had a long discussion about whether we should just deprecate `db.query` and replace it with 
-something like `db.query2` or `db.queryV2`. In the end, we decided that all new APIs should remain 
+We had a long discussion about whether we should just deprecate `db.query` and replace it with
+something like `db.query2` or `db.queryV2`. In the end, we decided that all new APIs should remain
 as simple as `db.query`, and that requiring you to replace all of your queries with `db._query` if you
-want to keep using the old syntax is preferable to forcing everyone in the future to use 
+want to keep using the old syntax is preferable to forcing everyone in the future to use
 `db.queryV2`, `db.queryV3`, `db.queryV4`, etc.
 
 <Callout title='v2'>
@@ -1007,12 +1051,13 @@ await db._query.users.findMany();
 
 // Using RQBv2
 await db.query.users.findMany();
-```
+
+````
 </Callout>
 
 ##### Step 3
 
-Define new relations or pull them using [this guide](#how-to-migrate-relations-schema-definition-from-v1-to-v2), 
+Define new relations or pull them using [this guide](#how-to-migrate-relations-schema-definition-from-v1-to-v2),
 then use them in your new queries or migrate your existing queries one by one.
 
 
@@ -1032,7 +1077,8 @@ export async function migrate<
 ) {
   ...
 }
-```
+````
+
 </Callout>
 <Callout title='now'>
 ```ts {3,5}
@@ -1133,8 +1179,8 @@ export interface DrizzleConfig<
 </Callout>
 </Callout>
 
-3. The following entities have been moved from `drizzle-orm` and `drizzle-orm/relations` to `drizzle-orm/_relations`. The original imports now 
-include new types used by Relational Queries v2, so make sure to update your imports if you intend to use the older types:
+3. The following entities have been moved from `drizzle-orm` and `drizzle-orm/relations` to `drizzle-orm/_relations`. The original imports now
+   include new types used by Relational Queries v2, so make sure to update your imports if you intend to use the older types:
 
 <Callout collapsed='A list of all moved entities'>
 - `Relation`
@@ -1172,8 +1218,8 @@ include new types used by Relational Queries v2, so make sure to update your imp
 - `mapRelationalRow`
 </Callout>
 
-4. In the same manner, `${dialect}-core/query-builders/query` files were moved to `${dialect}-core/query-builders/_query` 
-with RQB v2's alternatives being put in their place
+4. In the same manner, `${dialect}-core/query-builders/query` files were moved to `${dialect}-core/query-builders/_query`
+   with RQB v2's alternatives being put in their place
 
 <Callout collapsed='Examples'>
 <Callout type='error' title='before'>

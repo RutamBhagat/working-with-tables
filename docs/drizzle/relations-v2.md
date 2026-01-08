@@ -31,6 +31,7 @@ import Npm from "@mdx/Npm.astro";
 The sole purpose of Drizzle relations is to let you query your relational data in the most simple and concise way:
 
 <CodeTabs items={["Relational queries", "Select with joins"]}>
+
 <Section>
 ```ts
 import { drizzle } from 'drizzle-orm/…';
@@ -38,14 +39,14 @@ import { defineRelations } from 'drizzle-orm';
 import * as p from 'drizzle-orm/pg-core';
 
 export const users = p.pgTable("users", {
-  id: p.integer().primaryKey(),
-  name: p.text().notNull(),
+id: p.integer().primaryKey(),
+name: p.text().notNull(),
 });
 
 export const posts = p.pgTable("posts", {
-  id: p.integer().primaryKey(),
-  content: p.text().notNull(),
-  ownerId: p.integer("owner_id"),
+id: p.integer().primaryKey(),
+content: p.text().notNull(),
+ownerId: p.integer("owner_id"),
 });
 
 const relations = defineRelations({ users, posts }, (r) => ({
@@ -401,6 +402,7 @@ connect tables not only by selecting specific columns but also through custom `w
 We can define a relation between `groups` and `users` so that when querying group's users, we only retrieve those whose `verified` column is set to `true`
 
 <CodeTabs items={["Relations", "Schema"]}>
+
 <Section>
 ```ts
 import { defineRelations } from "drizzle-orm";
@@ -408,15 +410,15 @@ import * as p from "drizzle-orm/pg-core";
 import * as schema from './schema';
 
 export const relations = defineRelations(schema, (r) => ({
-  groups: {
-    verifiedUsers: r.many.users({
-      from: r.groups.id.through(r.usersToGroups.groupId),
-      to: r.users.id.through(r.usersToGroups.userId),
-      where: {
-        verified: true,
-      },
-    }),
-  },
+groups: {
+verifiedUsers: r.many.users({
+from: r.groups.id.through(r.usersToGroups.groupId),
+to: r.users.id.through(r.usersToGroups.userId),
+where: {
+verified: true,
+},
+}),
+},
 }));
 
 ...
@@ -940,6 +942,7 @@ The following two examples will work exactly the same in terms of querying the d
 
 <CodeTabs items={["schema1.ts", "schema2.ts"]}>
 <CodeTab>
+
 ```ts {15}
 export const users = p.pgTable("users", {
   id: p.integer().primaryKey(),
@@ -961,6 +964,7 @@ export const relations = defineRelations({ users, profileInfo }, (r) => ({
   },
 }));
 ```
+
 </CodeTab>
 <CodeTab>
 ```ts {15}
@@ -970,20 +974,21 @@ export const users = p.pgTable("users", {
 });
 
 export const profileInfo = p.pgTable("profile_info", {
-  id: p.integer().primaryKey(),
-  userId: p.integer("user_id").references(() => users.id),
-  metadata: p.jsonb(),
+id: p.integer().primaryKey(),
+userId: p.integer("user_id").references(() => users.id),
+metadata: p.jsonb(),
 });
 
 export const relations = defineRelations({ users, profileInfo }, (r) => ({
-  users: {
-    profileInfo: r.one.profileInfo({
-      from: r.users.id,
-      to: r.profileInfo.userId,
-    }),
-  },
+users: {
+profileInfo: r.one.profileInfo({
+from: r.users.id,
+to: r.profileInfo.userId,
+}),
+},
 }));
-```
+
+````
 </CodeTab>
 </CodeTabs>
 
@@ -1032,6 +1037,6 @@ export const relations = defineRelations({ users, posts }, (r) => ({
     }),
   },
 }));
-```
+````
 
 ### Troubleshooting

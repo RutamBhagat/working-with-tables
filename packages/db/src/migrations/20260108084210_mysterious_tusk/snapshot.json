@@ -2,9 +2,7 @@
   "version": "8",
   "dialect": "postgres",
   "id": "bc56221b-2f5c-411b-9fe8-34df0ddd23ba",
-  "prevIds": [
-    "00000000-0000-0000-0000-000000000000"
-  ],
+  "prevIds": ["00000000-0000-0000-0000-000000000000"],
   "ddl": [
     {
       "isRlsEnabled": false,
@@ -237,14 +235,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "user_id"
-      ],
+      "columns": ["user_id"],
       "schemaTo": "public",
       "tableTo": "user",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "comment_user_id_user_id_fkey",
@@ -254,14 +248,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "photo_id"
-      ],
+      "columns": ["photo_id"],
       "schemaTo": "public",
       "tableTo": "photo",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "comment_photo_id_photo_id_fkey",
@@ -271,14 +261,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "user_id"
-      ],
+      "columns": ["user_id"],
       "schemaTo": "public",
       "tableTo": "user",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "like_user_id_user_id_fkey",
@@ -288,14 +274,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "photo_id"
-      ],
+      "columns": ["photo_id"],
       "schemaTo": "public",
       "tableTo": "photo",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "like_photo_id_photo_id_fkey",
@@ -305,14 +287,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "user_id"
-      ],
+      "columns": ["user_id"],
       "schemaTo": "public",
       "tableTo": "user",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "photo_user_id_user_id_fkey",
@@ -321,9 +299,7 @@
       "table": "photo"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "comment_pkey",
       "schema": "public",
@@ -331,9 +307,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "like_pkey",
       "schema": "public",
@@ -341,9 +315,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "photo_pkey",
       "schema": "public",
@@ -351,9 +323,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "user_pkey",
       "schema": "public",
@@ -362,9 +332,7 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "username"
-      ],
+      "columns": ["username"],
       "nullsNotDistinct": false,
       "name": "user_username_key",
       "schema": "public",
@@ -373,9 +341,7 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "email"
-      ],
+      "columns": ["email"],
       "nullsNotDistinct": false,
       "name": "user_email_key",
       "schema": "public",
