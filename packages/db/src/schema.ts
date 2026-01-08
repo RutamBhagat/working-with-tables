@@ -14,7 +14,7 @@ export const photo = pgTable("photo", {
 
 export const comment = pgTable("comment", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
-  text: text().notNull(),
+  content: text().notNull(),
   userId: integer().references(() => user.id, { onDelete: "cascade" }),
   photoId: integer().references(() => photo.id, { onDelete: "cascade" }),
 });
