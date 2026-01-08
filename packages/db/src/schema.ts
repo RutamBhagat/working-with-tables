@@ -3,7 +3,6 @@ import { integer, pgTable, text } from "drizzle-orm/pg-core";
 export const user = pgTable("user", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   username: text().unique().notNull(),
-  email: text().unique().notNull(),
 });
 
 export const photo = pgTable("photo", {
