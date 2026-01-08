@@ -1,26 +1,10 @@
 import { zValidator } from "@hono/zod-validator";
-import { avg, count, db, desc, eq, sql, sum } from "@working-with-tables/db";
+import { avg, count, db, desc, eq, sql } from "@working-with-tables/db";
 import { comment, photo, user } from "@working-with-tables/db/schema";
 import { Hono } from "hono";
 import { z } from "zod";
 
 export const photoRouter = new Hono();
-
-photoRouter.get("/with-user", async (c) => {
-  try {
-    const photos = await db.query.photo.findMany({
-      with: {
-        user: true,
-      },
-    });
-    return c.json({ success: true, data: photos });
-  } catch (error) {
-    return c.json(
-      { success: false, message: "Internal server error", error: error },
-      500
-    );
-  }
-});
 
 photoRouter.get("/most-active-user", async (c) => {
   try {
@@ -61,6 +45,7 @@ photoRouter.get("/most-commented-photo", async (c) => {
       .select({
         id: photo.id,
         url: photo.url,
+        userId: photo.userId,
         commentCount: count(comment.id),
       })
       .from(photo)
@@ -80,6 +65,52 @@ photoRouter.get("/most-commented-photo", async (c) => {
     }
 
     return c.json({ success: true, data: mostCommentedPhoto });
+  } catch (error) {
+    return c.json(
+      { success: false, message: "Internal server error", error: error },
+      500
+    );
+  }
+});
+
+photoRouter.get("/average-character-count-per-comment", async (c) => {
+  try {
+    const [averageCharacterCountPerComment] = await db
+      .select({
+        averageCharacterCountPerComment: avg(
+          sql<number>`length(${comment.content})`
+        ),
+      })
+      .from(comment);
+
+    if (!averageCharacterCountPerComment) {
+      return c.json(
+        {
+          success: false,
+          message: "No comments found",
+          error: new Error("No comments found"),
+        },
+        404
+      );
+    }
+
+    return c.json({ success: true, data: averageCharacterCountPerComment });
+  } catch (error) {
+    return c.json(
+      { success: false, message: "Internal server error", error: error },
+      500
+    );
+  }
+});
+
+photoRouter.get("/with-user", async (c) => {
+  try {
+    const photos = await db.query.photo.findMany({
+      with: {
+        user: true,
+      },
+    });
+    return c.json({ success: true, data: photos });
   } catch (error) {
     return c.json(
       { success: false, message: "Internal server error", error: error },
