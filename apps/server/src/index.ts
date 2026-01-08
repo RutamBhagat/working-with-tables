@@ -3,6 +3,7 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { photoRouter } from "./router/photo";
+import { commentRouter } from "./router/comment";
 
 const app = new Hono();
 
@@ -20,6 +21,7 @@ app.get("/", (c) => {
 });
 
 app.route("/photo", photoRouter);
+app.route("/comment", commentRouter);
 
 import { serve } from "@hono/node-server";
 
