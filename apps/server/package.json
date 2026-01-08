@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@hono/node-server": "^1.14.4",
+    "@hono/zod-validator": "^0.7.6",
     "@working-with-tables/db": "workspace:*",
     "@working-with-tables/env": "workspace:*",
     "dotenv": "catalog:",

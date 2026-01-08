@@ -2,6 +2,7 @@ import { env } from "@working-with-tables/env/server";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
+import { photoRouter } from "./router/photo";
 
 const app = new Hono();
 
@@ -11,12 +12,14 @@ app.use(
   cors({
     origin: env.CORS_ORIGIN,
     allowMethods: ["GET", "POST", "OPTIONS"],
-  }),
+  })
 );
 
 app.get("/", (c) => {
   return c.text("OK");
 });
+
+app.route("/photo", photoRouter);
 
 import { serve } from "@hono/node-server";
 
@@ -27,5 +30,5 @@ serve(
   },
   (info) => {
     console.log(`Server is running on http://localhost:${info.port}`);
-  },
+  }
 );

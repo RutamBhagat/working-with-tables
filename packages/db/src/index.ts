@@ -6,3 +6,5 @@ export const db = drizzle(env.DATABASE_URL, {
   relations,
   casing: "snake_case",
 });
+
+export { eq } from "drizzle-orm";
