@@ -3,14 +3,6 @@ import { defineRelations } from "drizzle-orm";
 
 export const relations = defineRelations(schema, (r) => ({
   user: {
-    followers: r.many.user({
-      from: r.user.id,
-      to: r.user.id,
-    }),
-    following: r.many.user({
-      from: r.user.id,
-      to: r.user.id,
-    }),
     photos: r.many.photo({
       from: r.user.id,
       to: r.photo.userId,
@@ -46,10 +38,6 @@ export const relations = defineRelations(schema, (r) => ({
     photo: r.one.photo({
       from: r.comment.photoId,
       to: r.photo.id,
-    }),
-    comment: r.one.comment({
-      from: r.comment.id,
-      to: r.comment.id,
     }),
     likes: r.many.like({
       from: r.comment.id,
