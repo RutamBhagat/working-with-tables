@@ -1,5 +1,5 @@
 import { zValidator } from "@hono/zod-validator";
-import { avg, count, db, eq, sql } from "@working-with-tables/db";
+import { avg, count, db, desc, eq, sql, sum } from "@working-with-tables/db";
 import { comment, photo, user } from "@working-with-tables/db/schema";
 import { Hono } from "hono";
 import { z } from "zod";
@@ -14,6 +14,39 @@ photoRouter.get("/with-user", async (c) => {
       },
     });
     return c.json({ success: true, data: photos });
+  } catch (error) {
+    return c.json(
+      { success: false, message: "Internal server error", error: error },
+      500
+    );
+  }
+});
+
+photoRouter.get("/most-active-user", async (c) => {
+  try {
+    const [mostActiveUser] = await db
+      .select({
+        id: user.id,
+        username: user.username,
+        activityScore: sql<number>`${photo.id} + ${comment.id}`,
+      })
+      .from(user)
+      .leftJoin(photo, eq(user.id, photo.userId))
+      .leftJoin(comment, eq(user.id, comment.userId))
+      .orderBy(desc(sql<number>`${photo.id} + ${comment.id}`));
+
+    if (!mostActiveUser) {
+      return c.json(
+        {
+          success: false,
+          message: "No users found",
+          error: new Error("No users found"),
+        },
+        404
+      );
+    }
+
+    return c.json({ success: true, data: mostActiveUser });
   } catch (error) {
     return c.json(
       { success: false, message: "Internal server error", error: error },
