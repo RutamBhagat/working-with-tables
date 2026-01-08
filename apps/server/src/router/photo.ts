@@ -55,6 +55,39 @@ photoRouter.get("/most-active-user", async (c) => {
   }
 });
 
+photoRouter.get("/most-commented-photo", async (c) => {
+  try {
+    const [mostCommentedPhoto] = await db
+      .select({
+        id: photo.id,
+        url: photo.url,
+        commentCount: count(comment.id),
+      })
+      .from(photo)
+      .leftJoin(comment, eq(photo.id, comment.photoId))
+      .orderBy(desc(count(comment.id)))
+      .groupBy(photo.id);
+
+    if (!mostCommentedPhoto) {
+      return c.json(
+        {
+          success: false,
+          message: "No photos found",
+          error: new Error("No photos found"),
+        },
+        404
+      );
+    }
+
+    return c.json({ success: true, data: mostCommentedPhoto });
+  } catch (error) {
+    return c.json(
+      { success: false, message: "Internal server error", error: error },
+      500
+    );
+  }
+});
+
 photoRouter.get("/with-user-query-builder", async (c) => {
   try {
     const photos = await db
