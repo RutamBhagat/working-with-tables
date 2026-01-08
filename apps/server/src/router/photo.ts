@@ -1,5 +1,5 @@
 import { zValidator } from "@hono/zod-validator";
-import { count, db, eq, sql } from "@working-with-tables/db";
+import { avg, count, db, eq, sql } from "@working-with-tables/db";
 import { comment, photo, user } from "@working-with-tables/db/schema";
 import { Hono } from "hono";
 import { z } from "zod";
@@ -36,6 +36,35 @@ photoRouter.get("/with-user-query-builder", async (c) => {
       .from(photo)
       .leftJoin(user, eq(photo.userId, user.id));
     return c.json({ success: true, data: photos });
+  } catch (error) {
+    return c.json(
+      { success: false, message: "Internal server error", error: error },
+      500
+    );
+  }
+});
+
+photoRouter.get("/average-comments-per-photo", async (c) => {
+  try {
+    const [averageCommentsPerPhoto] = await db
+      .select({
+        averageCommentsPerPhoto: avg(comment.id),
+      })
+      .from(photo)
+      .leftJoin(comment, eq(photo.id, comment.photoId));
+
+    if (!averageCommentsPerPhoto) {
+      return c.json(
+        {
+          success: false,
+          message: "No photos found",
+          error: new Error("No photos found"),
+        },
+        404
+      );
+    }
+
+    return c.json({ success: true, data: averageCommentsPerPhoto });
   } catch (error) {
     return c.json(
       { success: false, message: "Internal server error", error: error },
