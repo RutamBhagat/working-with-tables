@@ -9,18 +9,18 @@ export const user = pgTable("user", {
 export const photo = pgTable("photo", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   url: text().notNull(),
-  userId: integer().references(() => user.id),
+  userId: integer().references(() => user.id, { onDelete: "cascade" }),
 });
 
 export const comment = pgTable("comment", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   text: text().notNull(),
-  userId: integer().references(() => user.id),
-  photoId: integer().references(() => photo.id),
+  userId: integer().references(() => user.id, { onDelete: "cascade" }),
+  photoId: integer().references(() => photo.id, { onDelete: "cascade" }),
 });
 
 export const like = pgTable("like", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
-  userId: integer().references(() => user.id),
-  photoId: integer().references(() => photo.id),
+  userId: integer().references(() => user.id, { onDelete: "cascade" }),
+  photoId: integer().references(() => photo.id, { onDelete: "cascade" }),
 });
