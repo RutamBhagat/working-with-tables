@@ -1,6 +1,6 @@
 import { zValidator } from "@hono/zod-validator";
-import { db, eq } from "@working-with-tables/db";
-import { photo, user } from "@working-with-tables/db/schema";
+import { count, db, eq, sql } from "@working-with-tables/db";
+import { comment, photo, user } from "@working-with-tables/db/schema";
 import { Hono } from "hono";
 import { z } from "zod";
 
@@ -54,6 +54,9 @@ photoRouter.get(
         where: {
           id: id,
         },
+        with: {
+          comments: true,
+        },
       });
 
       if (!photo) {
@@ -67,7 +70,56 @@ photoRouter.get(
         );
       }
 
-      return c.json({ success: true, data: photo });
+      const commentCount = photo.comments.length;
+
+      return c.json({
+        success: true,
+        data: {
+          id: photo.id,
+          url: photo.url,
+          userId: photo.userId,
+          commentCount,
+        },
+      });
+    } catch (error) {
+      return c.json(
+        { success: false, message: "Internal server error", error: error },
+        500
+      );
+    }
+  }
+);
+
+photoRouter.get(
+  "/:id/query-builder",
+  zValidator("param", z.object({ id: z.coerce.number() })),
+  async (c) => {
+    try {
+      const { id } = c.req.valid("param");
+      const [photoResult] = await db
+        .select({
+          id: photo.id,
+          url: photo.url,
+          userId: photo.userId,
+          commentCount: count(comment.id),
+        })
+        .from(photo)
+        .leftJoin(comment, eq(photo.id, comment.photoId))
+        .where(eq(photo.id, id))
+        .groupBy(photo.id);
+
+      if (!photoResult) {
+        return c.json(
+          {
+            success: false,
+            error: new Error("Photo not found"),
+            message: "Photo not found",
+          },
+          404
+        );
+      }
+
+      return c.json({ success: true, data: photoResult });
     } catch (error) {
       return c.json(
         { success: false, message: "Internal server error", error: error },
