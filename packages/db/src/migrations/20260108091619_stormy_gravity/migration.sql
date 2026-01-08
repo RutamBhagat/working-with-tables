@@ -1,5 +1,0 @@
-ALTER TABLE "comment" DROP CONSTRAINT "comment_user_id_user_id_fkey", ADD CONSTRAINT "comment_user_id_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "comment" DROP CONSTRAINT "comment_photo_id_photo_id_fkey", ADD CONSTRAINT "comment_photo_id_photo_id_fkey" FOREIGN KEY ("photo_id") REFERENCES "photo"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "like" DROP CONSTRAINT "like_user_id_user_id_fkey", ADD CONSTRAINT "like_user_id_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "like" DROP CONSTRAINT "like_photo_id_photo_id_fkey", ADD CONSTRAINT "like_photo_id_photo_id_fkey" FOREIGN KEY ("photo_id") REFERENCES "photo"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "photo" DROP CONSTRAINT "photo_user_id_user_id_fkey", ADD CONSTRAINT "photo_user_id_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE CASCADE;

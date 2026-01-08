@@ -1,1 +1,0 @@
-ALTER TABLE "comment" RENAME COLUMN "text" TO "content";
