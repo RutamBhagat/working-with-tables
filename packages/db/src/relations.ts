@@ -1,4 +1,4 @@
-import * as schema from "./schema.ts";
+import * as schema from "./schema";
 import { defineRelations } from "drizzle-orm";
 
 export const relations = defineRelations(schema, (r) => ({
@@ -39,10 +39,6 @@ export const relations = defineRelations(schema, (r) => ({
       from: r.comment.photoId,
       to: r.photo.id,
     }),
-    likes: r.many.like({
-      from: r.comment.id,
-      to: r.like.commentId,
-    }),
   },
   like: {
     user: r.one.user({
@@ -52,10 +48,6 @@ export const relations = defineRelations(schema, (r) => ({
     photo: r.one.photo({
       from: r.like.photoId,
       to: r.photo.id,
-    }),
-    comment: r.one.comment({
-      from: r.like.commentId,
-      to: r.comment.id,
     }),
   },
 }));
