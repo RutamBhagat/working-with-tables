@@ -107,9 +107,20 @@ photoRouter.get("/with-user", async (c) => {
   try {
     const photos = await db.query.photo.findMany({
       with: {
+        comments: true,
         user: true,
       },
     });
+    if (photos.length === 0) {
+      return c.json(
+        {
+          success: false,
+          message: "No photos found",
+          error: new Error("No photos found"),
+        },
+        404
+      );
+    }
     return c.json({ success: true, data: photos });
   } catch (error) {
     return c.json(
