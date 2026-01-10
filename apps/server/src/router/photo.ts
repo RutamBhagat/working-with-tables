@@ -100,11 +100,12 @@ photoRouter.get(
   "/user-commented-on-first-two-photos-with-filter",
   async (c) => {
     try {
-      const firstTwoPhotos = await db
-        .select()
+      const firstPhotos = db
+        .select({ id: photo.id })
         .from(photo)
         .orderBy(asc(photo.id))
-        .limit(2);
+        .limit(50)
+        .as("firstPhotos");
 
       const userCommentedOnFirstTwoPhotos = await db
         .select({
@@ -115,11 +116,11 @@ photoRouter.get(
         .where(
           inArray(
             comment.photoId,
-            firstTwoPhotos.map((photo) => photo.id)
+            db.select({ id: firstPhotos.id }).from(firstPhotos)
           )
         )
         .groupBy(comment.userId)
-        .having(gt(count(comment.id), 2));
+        .having(gt(count(comment.id), 20));
 
       if (userCommentedOnFirstTwoPhotos.length === 0) {
         return c.json(
