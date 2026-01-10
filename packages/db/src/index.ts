@@ -7,4 +7,4 @@ export const db = drizzle(env.DATABASE_URL, {
   casing: "snake_case",
 });
 
-export { eq, sql, count, avg, asc, desc, sum } from "drizzle-orm";
+export { eq, sql, count, avg, asc, desc, sum, max } from "drizzle-orm";
