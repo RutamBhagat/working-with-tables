@@ -1,5 +1,15 @@
 import { zValidator } from "@hono/zod-validator";
-import { avg, count, db, desc, eq, sql } from "@working-with-tables/db";
+import {
+  and,
+  avg,
+  count,
+  db,
+  desc,
+  eq,
+  gt,
+  lt,
+  sql,
+} from "@working-with-tables/db";
 import { comment, photo, user } from "@working-with-tables/db/schema";
 import { Hono } from "hono";
 import { z } from "zod";
@@ -32,6 +42,35 @@ photoRouter.get("/count-comments-per-photo", async (c) => {
       .from(comment)
       .groupBy(comment.photoId)
       .orderBy(desc(count(comment.id)));
+    if (commentCountPerPhoto.length === 0) {
+      return c.json(
+        {
+          success: false,
+          message: "No comments found",
+          error: new Error("No comments found"),
+        },
+        404
+      );
+    }
+    return c.json({ success: true, data: commentCountPerPhoto });
+  } catch (error) {
+    return c.json(
+      { success: false, message: "Internal server error", error: error },
+      500
+    );
+  }
+});
+
+photoRouter.get("/count-comments-per-photo-with-filter", async (c) => {
+  try {
+    const commentCountPerPhoto = await db
+      .select({
+        photoId: comment.photoId,
+        commentCount: count(comment.id),
+      })
+      .from(comment)
+      .groupBy(comment.photoId)
+      .having(and(lt(comment.photoId, 10), gt(count(), 2)));
     if (commentCountPerPhoto.length === 0) {
       return c.json(
         {
