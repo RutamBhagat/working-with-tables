@@ -14,6 +14,8 @@ export {
   lt,
   lte,
   and,
+  or,
+  inArray,
   sql,
   count,
   avg,

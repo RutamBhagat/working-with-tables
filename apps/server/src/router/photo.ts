@@ -1,13 +1,16 @@
 import { zValidator } from "@hono/zod-validator";
 import {
   and,
+  asc,
   avg,
   count,
   db,
   desc,
   eq,
   gt,
+  inArray,
   lt,
+  or,
   sql,
 } from "@working-with-tables/db";
 import { comment, photo, user } from "@working-with-tables/db/schema";
@@ -92,6 +95,52 @@ photoRouter.get("/count-comments-per-photo-with-filter", async (c) => {
     );
   }
 });
+
+photoRouter.get(
+  "/user-commented-on-first-two-photos-with-filter",
+  async (c) => {
+    try {
+      const firstTwoPhotos = await db
+        .select()
+        .from(photo)
+        .orderBy(asc(photo.id))
+        .limit(2);
+
+      const userCommentedOnFirstTwoPhotos = await db
+        .select({
+          userId: comment.userId,
+          commentCount: count(comment.id),
+        })
+        .from(comment)
+        .where(
+          inArray(
+            comment.photoId,
+            firstTwoPhotos.map((photo) => photo.id)
+          )
+        )
+        .groupBy(comment.userId)
+        .having(gt(count(comment.id), 2));
+
+      if (userCommentedOnFirstTwoPhotos.length === 0) {
+        return c.json(
+          {
+            success: false,
+            message: "No users found",
+            error: new Error("No users found"),
+          },
+          404
+        );
+      }
+
+      return c.json({ success: true, data: userCommentedOnFirstTwoPhotos });
+    } catch (error) {
+      return c.json(
+        { success: false, message: "Internal server error", error: error },
+        500
+      );
+    }
+  }
+);
 
 photoRouter.get("/most-active-user", async (c) => {
   try {
