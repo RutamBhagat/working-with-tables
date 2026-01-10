@@ -6,6 +6,51 @@ import { z } from "zod";
 
 export const photoRouter = new Hono();
 
+photoRouter.get("/count-photos", async (c) => {
+  try {
+    const photoCount = await db
+      .select({
+        photoCount: count(),
+      })
+      .from(photo);
+    return c.json({ success: true, data: photoCount });
+  } catch (error) {
+    return c.json(
+      { success: false, message: "Internal server error", error: error },
+      500
+    );
+  }
+});
+
+photoRouter.get("/count-comments-per-photo", async (c) => {
+  try {
+    const commentCountPerPhoto = await db
+      .select({
+        photoId: comment.photoId,
+        commentCount: count(comment.id),
+      })
+      .from(comment)
+      .groupBy(comment.photoId)
+      .orderBy(desc(count(comment.id)));
+    if (commentCountPerPhoto.length === 0) {
+      return c.json(
+        {
+          success: false,
+          message: "No comments found",
+          error: new Error("No comments found"),
+        },
+        404
+      );
+    }
+    return c.json({ success: true, data: commentCountPerPhoto });
+  } catch (error) {
+    return c.json(
+      { success: false, message: "Internal server error", error: error },
+      500
+    );
+  }
+});
+
 photoRouter.get("/most-active-user", async (c) => {
   try {
     const [mostActiveUser] = await db
