@@ -69,8 +69,10 @@ photoRouter.get("/count-comments-per-photo-with-filter", async (c) => {
         commentCount: count(comment.id),
       })
       .from(comment)
+      .where(lt(comment.photoId, 3))
       .groupBy(comment.photoId)
-      .having(and(lt(comment.photoId, 10), gt(count(), 2)));
+      .having(gt(count(), 2));
+
     if (commentCountPerPhoto.length === 0) {
       return c.json(
         {
@@ -81,6 +83,7 @@ photoRouter.get("/count-comments-per-photo-with-filter", async (c) => {
         404
       );
     }
+
     return c.json({ success: true, data: commentCountPerPhoto });
   } catch (error) {
     return c.json(
